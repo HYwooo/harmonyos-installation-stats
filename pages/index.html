@@ -10,20 +10,22 @@
         :root {
             --background-color: #ffffff;
             --text-color: #000000;
-            --accent-color: #0071e3;
+            --accent-color: #007DFF;
             --overlay-background: rgba(255, 255, 255, 0.8);
-            --container-background: #f5f5f7;
+            --container-background: rgba(255, 255, 255, 0.618);
             --container-border: rgba(128, 128, 128, 0.1);
+            --chart-label-color: rgba(0, 0, 0, 0.7);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --background-color: #000000;
                 --text-color: #ffffff;
-                --accent-color: #0a84ff;
+                --accent-color: #007DFF;
                 --overlay-background: rgba(0, 0, 0, 0.8);
-                --container-background: #1d1d1f;
+                --container-background: rgba(30, 30, 30, 0.618);
                 --container-border: rgba(255, 255, 255, 0.1);
+                --chart-label-color: rgba(255, 255, 255, 0.7);
             }
         }
 
@@ -111,6 +113,19 @@
             font-weight: 600;
             letter-spacing: -0.5px;
             margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 3px;
+            background-color: var(--accent-color);
         }
 
         .subtitle {
@@ -140,6 +155,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid var(--container-border);
             transition: transform 0.3s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .stat-card:hover {
@@ -166,6 +182,7 @@
             margin: 40px 0;
             backdrop-filter: blur(10px);
             border: 1px solid var(--container-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .chart-label {
@@ -174,6 +191,7 @@
             font-weight: 400;
             text-align: center;
             margin-top: 15px;
+            color: var(--chart-label-color);
         }
 
         #growth-chart {
@@ -199,6 +217,7 @@
             padding: 20px;
             backdrop-filter: blur(10px);
             border: 1px solid var(--container-border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
         .milestone-title {
@@ -300,7 +319,7 @@
         <header>
             <h1>HarmonyOS Installation Stats</h1>
             <p class="subtitle">HarmonyOS Installation Statistics and Growth Forecast</p>
-            <p class="last-updated" id="last-updated">Last updated: --</p>
+            <p class="last-updated" id="last-updated">Latest Updated: --</p>
         </header>
 
         <div class="stats-grid">
@@ -337,19 +356,19 @@
 
         <div class="milestone-grid">
             <div class="milestone-card">
-                <div class="milestone-title">Next Milestone</div>
+                <div class="milestone-title">Milestone 1</div>
                 <div class="milestone-value" id="milestone-1b">--</div>
                 <div class="milestone-date" id="date-1b">Target Date: --</div>
                 <div class="milestone-days" id="days-1b">Days Remaining: --</div>
             </div>
             <div class="milestone-card">
-                <div class="milestone-title">Next Milestone</div>
+                <div class="milestone-title">Milestone 2</div>
                 <div class="milestone-value" id="milestone-2b">--</div>
                 <div class="milestone-date" id="date-2b">Target Date: --</div>
                 <div class="milestone-days" id="days-2b">Days Remaining: --</div>
             </div>
             <div class="milestone-card">
-                <div class="milestone-title">Next Milestone</div>
+                <div class="milestone-title">Milestone 3</div>
                 <div class="milestone-value" id="milestone-5b">--</div>
                 <div class="milestone-date" id="date-5b">Target Date: --</div>
                 <div class="milestone-days" id="days-5b">Days Remaining: --</div>
@@ -357,7 +376,8 @@
         </div>
 
         <footer>
-            <p>© 2025 <a href="https://github.com/HYwooo/harmonyos-installation-stats/" target="_blank">HYwooo</a>. Raw data acquired from harmony5.cn.</p>
+            <p>Qwen3 & Gemini： Vibe Coding Coming.</p>
+            <p>© 2025 <a href="https://github.com/HYwooo/harmonyos-installation-stats/" target="_blank">HYwooo</a>. Raw data are acquired from harmony5.cn.</p>
         </footer>
     </div>
 
@@ -365,6 +385,7 @@
         // Simulate loading process
         document.addEventListener('DOMContentLoaded', function() {
             let chartData = null;
+            let forecastData = null;
 
             // Function to parse CSV data
             function parseCSV(csvText) {
@@ -531,7 +552,8 @@
                     marker: {
                         color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim()
                     },
-                    name: 'Historical Data'
+                    name: 'Historical Data',
+                    showlegend: false
                 };
                 
                 // Create forecast traces
@@ -555,7 +577,8 @@
                     marker: {
                         color: '#32d74b'
                     },
-                    name: 'Optimistic Forecast'
+                    name: 'Optimistic Forecast',
+                    showlegend: false
                 };
                 
                 const forecastDates2 = [
@@ -574,7 +597,8 @@
                     marker: {
                         color: '#0a84ff'
                     },
-                    name: 'Most Likely Forecast'
+                    name: 'Most Likely Forecast',
+                    showlegend: false
                 };
                 
                 const forecastDates3 = [
@@ -593,11 +617,12 @@
                     marker: {
                         color: '#ff9f0a'
                     },
-                    name: 'Pessimistic Forecast'
+                    name: 'Pessimistic Forecast',
+                    showlegend: false
                 };
 
-                // Add annotations for forecast points
-                const annotations = [
+                // Add annotations for forecast points (only on desktop)
+                const annotations = window.innerWidth > 768 ? [
                     {
                         x: forecastData.dateOptimistic.toISOString().split('T')[0],
                         y: forecastData.targetMilestone,
@@ -646,21 +671,45 @@
                             color: '#ff9f0a'
                         }
                     }
-                ];
+                ] : [];
+
+                // Add label for the middle point (most likely) with border
+                const middlePointAnnotation = {
+                    x: forecastData.dateMostLikely.toISOString().split('T')[0],
+                    y: forecastData.targetMilestone,
+                    xref: 'x',
+                    yref: 'y',
+                    text: forecastData.dateMostLikely.toISOString().split('T')[0] + '<br>Most Likely Approx.',
+                    showarrow: true,
+                    arrowhead: 7,
+                    ax: 0,
+                    ay: -40,
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: '#0a84ff',
+                    borderwidth: 2,
+                    font: {
+                        color: '#0a84ff',
+                        size: 12
+                    }
+                };
+
+                annotations.push(middlePointAnnotation);
 
                 // Define layout
                 const layout = {
                     margin: { t: 0, b: 40, l: 50, r: 50 },
                     xaxis: {
-                        title: 'Date'
+                        title: 'Date',
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim()
                     },
                     yaxis: {
-                        title: 'Installations'
+                        title: 'Installations',
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim()
                     },
                     template: 'plotly_white',
                     paper_bgcolor: 'rgba(0,0,0,0)',
                     plot_bgcolor: 'rgba(0,0,0,0)',
-                    showlegend: true,
+                    showlegend: false, // Remove legend
                     annotations: annotations
                 };
                 
@@ -756,7 +805,7 @@
 
                 // Update last updated date
                 const latest = data[data.length - 1];
-                document.getElementById('last-updated').textContent = 'Last updated: ' + latest.Date;
+                document.getElementById('last-updated').textContent = 'Latest Updated: ' + latest.Date;
 
                 // Update total installations
                 document.getElementById('total-installations').textContent = formatNumber(parseInt(latest.Installations));
@@ -802,7 +851,7 @@
                 calculateMilestones(data);
                 
                 // Calculate forecast data
-                const forecastData = calculateForecast(data);
+                forecastData = calculateForecast(data);
                 
                 // Create forecast chart
                 createForecastChart(data, forecastData);
@@ -828,21 +877,47 @@
                     marker: {
                         color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim()
                     },
-                    name: 'Installations'
+                    name: 'Installations',
+                    showlegend: false
                 };
                 
+                // Add annotation for the last data point with border
+                const latest = data[data.length - 1];
+                const lastPointAnnotation = {
+                    x: latest.Date,
+                    y: parseInt(latest.Installations),
+                    xref: 'x',
+                    yref: 'y',
+                    text: formatNumber(parseInt(latest.Installations)) + '<br>' + latest.Date,
+                    showarrow: true,
+                    arrowhead: 7,
+                    ax: 0,
+                    ay: -40,
+                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                    bordercolor: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim(),
+                    borderwidth: 2,
+                    font: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim(),
+                        size: 12
+                    }
+                };
+
                 // Define layout
                 const layout = {
                     margin: { t: 0, b: 40, l: 50, r: 50 },
                     xaxis: {
-                        title: 'Date'
+                        title: 'Date',
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim()
                     },
                     yaxis: {
-                        title: 'Installations'
+                        title: 'Installations',
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim()
                     },
                     template: 'plotly_white',
                     paper_bgcolor: 'rgba(0,0,0,0)',
-                    plot_bgcolor: 'rgba(0,0,0,0)'
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    showlegend: false, // Remove legend
+                    annotations: [lastPointAnnotation]
                 };
                 
                 // Create plot
@@ -852,6 +927,112 @@
             // Function to resize chart
             function resizeChart() {
                 if (chartData) {
+                    // Update axis colors on resize
+                    const chartLabelColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim();
+                    
+                    Plotly.relayout('growth-chart', {
+                        'xaxis.color': chartLabelColor,
+                        'yaxis.color': chartLabelColor
+                    });
+                    
+                    if (forecastData) {
+                        Plotly.relayout('forecast-chart', {
+                            'xaxis.color': chartLabelColor,
+                            'yaxis.color': chartLabelColor,
+                            // Update annotations based on screen size
+                            annotations: window.innerWidth > 768 ? [
+                                {
+                                    x: forecastData.dateOptimistic.toISOString().split('T')[0],
+                                    y: forecastData.targetMilestone,
+                                    xref: 'x',
+                                    yref: 'y',
+                                    text: 'Optimistic<br>' + forecastData.dateOptimistic.toISOString().split('T')[0],
+                                    showarrow: true,
+                                    arrowhead: 7,
+                                    ax: 0,
+                                    ay: -40,
+                                    bgcolor: 'rgba(50, 215, 75, 0.1)',
+                                    bordercolor: '#32d74b',
+                                    font: {
+                                        color: '#32d74b'
+                                    }
+                                },
+                                {
+                                    x: forecastData.dateMostLikely.toISOString().split('T')[0],
+                                    y: forecastData.targetMilestone,
+                                    xref: 'x',
+                                    yref: 'y',
+                                    text: 'Most Likely<br>' + forecastData.dateMostLikely.toISOString().split('T')[0],
+                                    showarrow: true,
+                                    arrowhead: 7,
+                                    ax: 0,
+                                    ay: -40,
+                                    bgcolor: 'rgba(10, 132, 255, 0.1)',
+                                    bordercolor: '#0a84ff',
+                                    font: {
+                                        color: '#0a84ff'
+                                    }
+                                },
+                                {
+                                    x: forecastData.datePessimistic.toISOString().split('T')[0],
+                                    y: forecastData.targetMilestone,
+                                    xref: 'x',
+                                    yref: 'y',
+                                    text: 'Pessimistic<br>' + forecastData.datePessimistic.toISOString().split('T')[0],
+                                    showarrow: true,
+                                    arrowhead: 7,
+                                    ax: 0,
+                                    ay: -40,
+                                    bgcolor: 'rgba(255, 159, 10, 0.1)',
+                                    bordercolor: '#ff9f0a',
+                                    font: {
+                                        color: '#ff9f0a'
+                                    }
+                                },
+                                // Middle point label
+                                {
+                                    x: forecastData.dateMostLikely.toISOString().split('T')[0],
+                                    y: forecastData.targetMilestone,
+                                    xref: 'x',
+                                    yref: 'y',
+                                    text: forecastData.dateMostLikely.toISOString().split('T')[0] + '<br>Most Likely Approx.',
+                                    showarrow: true,
+                                    arrowhead: 7,
+                                    ax: 0,
+                                    ay: -40,
+                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                    bordercolor: '#0a84ff',
+                                    borderwidth: 2,
+                                    font: {
+                                        color: '#0a84ff',
+                                        size: 12
+                                    }
+                                }
+                            ] : [
+                                // Middle point label (always show on resize)
+                                {
+                                    x: forecastData.dateMostLikely.toISOString().split('T')[0],
+                                    y: forecastData.targetMilestone,
+                                    xref: 'x',
+                                    yref: 'y',
+                                    text: forecastData.dateMostLikely.toISOString().split('T')[0] + '<br>Most Likely Approx.',
+                                    showarrow: true,
+                                    arrowhead: 7,
+                                    ax: 0,
+                                    ay: -40,
+                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                    bordercolor: '#0a84ff',
+                                    borderwidth: 2,
+                                    font: {
+                                        color: '#0a84ff',
+                                        size: 12
+                                    }
+                                }
+                            ],
+                            showlegend: false // Remove legend
+                        });
+                    }
+                    
                     Plotly.Plots.resize('growth-chart');
                     Plotly.Plots.resize('forecast-chart');
                 }
