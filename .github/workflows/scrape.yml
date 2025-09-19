@@ -45,14 +45,14 @@ jobs:
       # 第6步: (简化) 提交并推送变更
       - name: Commit and push if changed
         run: |
-          git config --local user.name "GitHub Action Bot"
-          git config --local user.email "action@github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
           # 注意：这里我们使用 `git add -f` (force) 或者更好的方式是检查文件是否存在
           # 一个更稳健的方式是先检查文件是否存在
           if [ -f harmony_install_stats.csv ]; then
             git add harmony_install_stats.csv
-            git diff --staged --quiet || git commit -m "feat: Update HarmonyOS install stats"
+            git diff --staged --quiet || git commit -m "ci: Update HarmonyOS installation stats."
             git push
           else
             echo "harmony_install_stats.csv not found, skipping commit."
