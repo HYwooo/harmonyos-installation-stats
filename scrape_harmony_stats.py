@@ -25,6 +25,9 @@ def fetch_harmony_data():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
+    # 添加一个User-Agent，模拟更真实的浏览器
+    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
+
 
     driver = None
     try:
@@ -34,12 +37,14 @@ def fetch_harmony_data():
         print(f"正在访问目标网页: {TARGET_URL}")
         driver.get(TARGET_URL)
 
-        print("等待详细数据表格加载...")
+        # --- 这是关键的修改 ---
+        # 旧的等待条件是 'table.data-table'，现在我们等待表格内部的第一行数据出现
+        print("等待详细数据表格内容加载...")
         wait = WebDriverWait(driver, 30)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.data-table")))
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.data-table tbody tr")))
 
-        print("表格已加载，正在解析数据...")
-        # Future-proof way to handle pandas read_html from a string
+        print("表格内容已加载，正在解析数据...")
+        # 使用 io.StringIO 来避免 Pandas 的 FutureWarning
         html_content = driver.page_source
         tables = pd.read_html(io.StringIO(html_content))
         
@@ -70,10 +75,8 @@ def process_and_update_csv(new_df):
         return
 
     try:
-        # --- 数据清洗和格式化 ---
         current_year = datetime.now().year
         
-        # 使用更健壮的.assign()方法链式处理数据，避免SettingWithCopyWarning
         processed_df = (
             new_df.rename(columns={
                 new_df.columns[0]: 'Date_Raw',
@@ -88,17 +91,14 @@ def process_and_update_csv(new_df):
             [['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
         )
         
-        # --- 调试输出：打印所有抓取到的数据 ---
         print("\n--- 本次从网页抓取并处理后的全部数据 ---")
         print(processed_df.to_string())
         print("----------------------------------------\n")
 
-        # --- 合并与去重 ---
         if os.path.exists(CSV_FILE):
             print(f"读取现有CSV文件: {CSV_FILE}")
             existing_df = pd.read_csv(CSV_FILE)
             combined_df = pd.concat([existing_df, processed_df], ignore_index=True)
-            print(f"合并前总条目数 (旧+新): {len(combined_df)}")
         else:
             print("CSV文件不存在，将创建新文件。")
             combined_df = processed_df
