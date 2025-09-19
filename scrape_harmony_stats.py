@@ -1,7 +1,6 @@
 # scrape_harmony_stats.py
 
 import os
-import time
 import pandas as pd
 from datetime import datetime
 from selenium import webdriver
@@ -10,6 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import io
 
 # 目标网页URL
 TARGET_URL = "https://harmony5.cn/install"
@@ -34,17 +34,15 @@ def fetch_harmony_data():
         print(f"正在访问目标网页: {TARGET_URL}")
         driver.get(TARGET_URL)
 
-        # 等待详细数据表格（class="data-table"）加载完成
         print("等待详细数据表格加载...")
         wait = WebDriverWait(driver, 30)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.data-table")))
 
         print("表格已加载，正在解析数据...")
-        # 使用pandas的read_html直接从页面源码解析表格
-        # read_html会返回一个包含页面上所有表格的列表
-        tables = pd.read_html(driver.page_source)
+        # Future-proof way to handle pandas read_html from a string
+        html_content = driver.page_source
+        tables = pd.read_html(io.StringIO(html_content))
         
-        # 根据MHTML文件，我们需要的表格是页面上的第一个
         if not tables:
             print("错误：在页面上未找到任何表格。")
             return None
@@ -67,49 +65,53 @@ def process_and_update_csv(new_df):
     """
     处理抓取到的新数据，并更新到CSV文件中。
     """
-    if new_df is None:
-        print("未获取到新数据，不更新CSV。")
+    if new_df is None or new_df.empty:
+        print("未获取到有效的新数据，不更新CSV。")
         return
 
     try:
         # --- 数据清洗和格式化 ---
-        # 1. 重命名列名
-        new_df.columns = ['Date_Raw', 'Installations', 'Daily_Increase', 'Growth_Rate']
-        
-        # 2. 处理日期：补全年份
         current_year = datetime.now().year
-        new_df['Date'] = pd.to_datetime(f'{current_year}-' + new_df['Date_Raw'])
-        new_df['Date'] = new_df['Date'].dt.strftime('%Y-%m-%d') # 格式化为 YYYY-MM-DD
-
-        # 3. 处理装机量：将 "xx万" 转换为整数
-        new_df['Installations'] = (new_df['Installations'].str.replace('万', '').astype(float) * 10000).astype(int)
         
-        # 4. 只保留我们需要的核心列
-        new_df = new_df[['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
-        print("新数据清洗完成，准备合并。")
-        print("最新获取的数据条目数:", len(new_df))
-        print(new_df.head().to_string())
+        # 使用更健壮的.assign()方法链式处理数据，避免SettingWithCopyWarning
+        processed_df = (
+            new_df.rename(columns={
+                new_df.columns[0]: 'Date_Raw',
+                new_df.columns[1]: 'Installations_Raw',
+                new_df.columns[2]: 'Daily_Increase',
+                new_df.columns[3]: 'Growth_Rate'
+            })
+            .assign(
+                Date=lambda df: pd.to_datetime(f'{current_year}-' + df['Date_Raw']).dt.strftime('%Y-%m-%d'),
+                Installations=lambda df: (df['Installations_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int)
+            )
+            [['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
+        )
+        
+        # --- 调试输出：打印所有抓取到的数据 ---
+        print("\n--- 本次从网页抓取并处理后的全部数据 ---")
+        print(processed_df.to_string())
+        print("----------------------------------------\n")
 
         # --- 合并与去重 ---
-        # 1. 如果CSV已存在，读取旧数据
         if os.path.exists(CSV_FILE):
             print(f"读取现有CSV文件: {CSV_FILE}")
             existing_df = pd.read_csv(CSV_FILE)
-            # 合并新旧数据
-            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+            combined_df = pd.concat([existing_df, processed_df], ignore_index=True)
             print(f"合并前总条目数 (旧+新): {len(combined_df)}")
         else:
             print("CSV文件不存在，将创建新文件。")
-            combined_df = new_df
+            combined_df = processed_df
 
-        # 2. 基于'Date'列去除重复项，保留最后出现的记录（即最新记录）
+        initial_rows = len(combined_df)
         combined_df.drop_duplicates(subset=['Date'], keep='last', inplace=True)
+        rows_after_dedupe = len(combined_df)
         
-        # 3. 按日期升序排序
+        print(f"去重操作完成，移除了 {initial_rows - rows_after_dedupe} 个重复行。")
+        
         combined_df.sort_values(by='Date', ascending=True, inplace=True)
-
-        # 4. 保存回CSV文件
         combined_df.to_csv(CSV_FILE, index=False)
+        
         print(f"CSV文件更新成功！当前总条目数: {len(combined_df)}")
 
     except Exception as e:
