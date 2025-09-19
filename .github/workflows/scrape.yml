@@ -1,10 +1,10 @@
 # .github/workflows/scrape.yml
 
-name: Daily HarmonyOS Install Scraper
+name: Daily HarmonyOS Installation Scraper
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -45,10 +45,22 @@ jobs:
       # 第6步: (简化) 提交并推送变更
       - name: Commit and push if changed
         run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "actions-bot@github.com"
-          git add harmony_install_stats.csv
-          # 使用下面的命令，只有在文件实际有变动时才会创建提交
-          git diff --staged --quiet || git commit -m "feat: Update HarmonyOS install stats"
-          # 只有在有新提交的情况下才会执行推送
-          git push
+          git config --local user.name "GitHub Action Bot"
+          git config --local user.email "action@github.com"
+          
+          # 注意：这里我们使用 `git add -f` (force) 或者更好的方式是检查文件是否存在
+          # 一个更稳健的方式是先检查文件是否存在
+          if [ -f harmony_install_stats.csv ]; then
+            git add harmony_install_stats.csv
+            git diff --staged --quiet || git commit -m "feat: Update HarmonyOS install stats"
+            git push
+          else
+            echo "harmony_install_stats.csv not found, skipping commit."
+          fi
+          # 同时处理可能的截图
+          if [ -f error_screenshot.png ]; then
+            git add error_screenshot.png
+            git diff --staged --quiet || git commit -m "chore: Add error screenshot for debugging"
+            git push
+          fi
+          
