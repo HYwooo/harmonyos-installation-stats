@@ -25,7 +25,7 @@ def fetch_harmony_data():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
+    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.196 Safari/537.36')
 
     driver = None
     try:
@@ -76,12 +76,13 @@ def process_and_update_csv(new_df):
             new_df.rename(columns={
                 new_df.columns[0]: 'Date_Raw',
                 new_df.columns[1]: 'Installations_Raw',
-                new_df.columns[2]: 'Daily_Increase',
+                new_df.columns[2]: 'Daily_Increase_Raw',
                 new_df.columns[3]: 'Growth_Rate'
             })
             .assign(
                 Date=lambda df: pd.to_datetime(f'{current_year}-' + df['Date_Raw']).dt.strftime('%Y-%m-%d'),
-                Installations=lambda df: (df['Installations_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int)
+                Installations=lambda df: (df['Installations_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int),
+                Daily_Increase=lambda df: (df['Daily_Increase_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int)
             )
             [['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
         )
