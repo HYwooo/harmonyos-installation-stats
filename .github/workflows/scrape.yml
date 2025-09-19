@@ -11,46 +11,44 @@ jobs:
   scrape-and-commit:
     runs-on: ubuntu-latest
 
+    # --- 新增部分：为工作流授予写入代码库的权限 ---
+    permissions:
+      contents: write
+
     steps:
+      # 第1步: 检出你的代码库
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 第2步: 设置Python环境
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.9'
 
+      # 第3步: 安装Google Chrome浏览器
       - name: Install Google Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      # --- 修改这里 ---
-      # 在依赖列表中添加 lxml
+      # 第4步: 安装Python依赖库
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pandas selenium webdriver-manager lxml
 
+      # 第5步: 运行爬虫脚本
       - name: Run scraper
         run: python scrape_harmony_stats.py
 
+      # 第6步: (简化) 提交并推送变更
       - name: Commit and push if changed
         run: |
           git config --global user.name "GitHub Action Bot"
           git config --global user.email "actions-bot@github.com"
-          # 注意：这里我们使用 `git add -f` (force) 或者更好的方式是检查文件是否存在
-          # 一个更稳健的方式是先检查文件是否存在
-          if [ -f harmony_install_stats.csv ]; then
-            git add harmony_install_stats.csv
-            git diff --staged --quiet || git commit -m "feat: Update HarmonyOS install stats"
-            git push
-          else
-            echo "harmony_install_stats.csv not found, skipping commit."
-          fi
-          # 同时处理可能的截图
-          if [ -f error_screenshot.png ]; then
-            git add error_screenshot.png
-            git diff --staged --quiet || git commit -m "chore: Add error screenshot for debugging"
-            git push
-          fi
+          git add harmony_install_stats.csv
+          # 使用下面的命令，只有在文件实际有变动时才会创建提交
+          git diff --staged --quiet || git commit -m "feat: Update HarmonyOS install stats"
+          # 只有在有新提交的情况下才会执行推送
+          git push
