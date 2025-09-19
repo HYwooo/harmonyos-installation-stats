@@ -25,9 +25,7 @@ def fetch_harmony_data():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--window-size=1920,1080")
-    # 添加一个User-Agent，模拟更真实的浏览器
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36')
-
 
     driver = None
     try:
@@ -37,14 +35,11 @@ def fetch_harmony_data():
         print(f"正在访问目标网页: {TARGET_URL}")
         driver.get(TARGET_URL)
 
-        # --- 这是关键的修改 ---
-        # 旧的等待条件是 'table.data-table'，现在我们等待表格内部的第一行数据出现
         print("等待详细数据表格内容加载...")
         wait = WebDriverWait(driver, 30)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "table.data-table tbody tr")))
 
         print("表格内容已加载，正在解析数据...")
-        # 使用 io.StringIO 来避免 Pandas 的 FutureWarning
         html_content = driver.page_source
         tables = pd.read_html(io.StringIO(html_content))
         
@@ -95,12 +90,17 @@ def process_and_update_csv(new_df):
         print(processed_df.to_string())
         print("----------------------------------------\n")
 
-        if os.path.exists(CSV_FILE):
+        # --- 这是关键的修改：增加文件大小检查 ---
+        # 只有当CSV文件存在且内容不为空时，才读取它
+        if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
             print(f"读取现有CSV文件: {CSV_FILE}")
             existing_df = pd.read_csv(CSV_FILE)
             combined_df = pd.concat([existing_df, processed_df], ignore_index=True)
         else:
-            print("CSV文件不存在，将创建新文件。")
+            if os.path.exists(CSV_FILE):
+                print("CSV文件存在但为空，将直接使用新抓取的数据。")
+            else:
+                print("CSV文件不存在，将创建新文件。")
             combined_df = processed_df
 
         initial_rows = len(combined_df)
