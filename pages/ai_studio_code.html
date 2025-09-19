@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>HarmonyOS Installation Stats & Forecast</title>
+    <meta name="description" content="Live tracking of HarmonyOS installation numbers, growth statistics, and data-driven forecasts for future milestones. Updated daily.">
+    <meta name="keywords" content="HarmonyOS, HongmengOS, Huawei, OS, Installation Stats, Growth Forecast, Tech, Mobile OS, 鸿蒙系统, 华为, 操作系统, 安装量, 数据统计, 增长预测">
+    <meta name="author" content="HYwooo">
+    <link rel="canonical" href="https://your-website-url.com/"> <!--! TODO: 请将此URL替换为您网站的实际网址 -->
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-website-url.com/"> <!--! TODO: 请将此URL替换为您网站的实际网址 -->
+    <meta property="og:title" content="HarmonyOS Installation Stats & Forecast">
+    <meta property="og:description" content="Live tracking of HarmonyOS installation numbers, growth statistics, and data-driven forecasts for future milestones.">
+    <meta property="og:image" content="https://your-website-url.com/preview-image.png"> <!--! TODO: 请添加一张预览图片的URL -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-website-url.com/"> <!--! TODO: 请将此URL替换为您网站的实际网址 -->
+    <meta property="twitter:title" content="HarmonyOS Installation Stats & Forecast">
+    <meta property="twitter:description" content="Live tracking of HarmonyOS installation numbers, growth statistics, and data-driven forecasts for future milestones.">
+    <meta property="twitter:image" content="https://your-website-url.com/preview-image.png"> <!--! TODO: 请添加一张预览图片的URL -->
+
+    <!-- Hreflang for multilingual SEO -->
+    <link rel="alternate" hreflang="en" href="https://your-website-url.com/en/">
+    <link rel="alternate" hreflang="zh" href="https://your-website-url.com/zh/">
+    <link rel="alternate" hreflang="x-default" href="https://your-website-url.com/">
+
+    <!-- External Libraries (already on CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #007DFF;
+            --overlay-background: rgba(255, 255, 255, 0.8);
+            --container-background: rgba(255, 255, 255, 0.618);
+            --container-border: rgba(128, 128, 128, 0.1);
+            --chart-label-color: rgba(0, 0, 0, 0.7);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #000000;
+                --text-color: #ffffff;
+                --accent-color: #007DFF;
+                --overlay-background: rgba(0, 0, 0, 0.8);
+                --container-background: rgba(30, 30, 30, 0.618);
+                --container-border: rgba(255, 255, 255, 0.1);
+                --chart-label-color: rgba(255, 255, 255, 0.7);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--overlay-background);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 20px;
+        }
+
+        .spinner-circle {
+            fill: none;
+            stroke: var(--text-color);
+            stroke-width: 4;
+            stroke-linecap: round;
+            transform-origin: center;
+        }
+
+        .loading-text {
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: -0.2px;
+            opacity: 0.7;
+        }
+        
+        /* Language Switcher */
+        .lang-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .lang-button {
+            background-color: var(--container-background);
+            border: 1px solid var(--container-border);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .lang-button svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            background-color: var(--container-background);
+            border: 1px solid var(--container-border);
+            border-radius: 8px;
+            padding: 5px;
+            list-style: none;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        }
+
+        .lang-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .lang-dropdown li {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .lang-dropdown li:hover {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <svg class="loading-spinner" viewBox="0 0 50 50">
+            <circle class="spinner-circle" cx="25" cy="25" r="20"></circle>
+        </svg>
+        <div class="loading-text" data-translate-key="loadingText">Loading HarmonyOS Installation Stats</div>
+    </div>
+
+    <!-- Language Switcher -->
+    <div class="lang-switcher">
+        <button class="lang-button" id="lang-button">
+             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+            </svg>
+            <span id="current-lang">EN</span>
+        </button>
+        <ul class="lang-dropdown" id="lang-dropdown">
+            <li data-lang="en">English</li>
+            <li data-lang="zh">中文</li>
+        </ul>
+    </div>
+
+    <!-- Main content will be injected here by script.js -->
+    <main id="app-container"></main>
+
+    <!-- 
+      将所有动态内容创建和数据获取逻辑移至外部JS文件。
+      使用 `defer` 属性确保HTML解析完毕后再执行脚本，且不会阻塞页面渲染。
+      建议将 script.js 文件托管到CDN以获得最佳性能。
+    -->
+    <script src="script.js" defer></script>
+</body>
+</html>
