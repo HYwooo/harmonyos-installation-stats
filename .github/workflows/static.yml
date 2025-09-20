@@ -38,6 +38,8 @@ jobs:
         with:
           # Upload entire repository
           path: './pages'
+      - name: Purge jsDelivr cache
+        run: curl --fail 'https://purge.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
