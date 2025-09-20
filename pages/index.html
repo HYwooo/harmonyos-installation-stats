@@ -1149,9 +1149,9 @@
             }
 
             // Load CSV data with cache-busting query parameter
-            //const csvUrl = `https://gcore.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv?v=${getCurrentDateYYYYMMDD()}`;
+            const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv?v=${getCurrentDateYYYYMMDD()}`;
             
-            const csvUrl = `https://gcore.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv`;
+            //const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv`;
             fetch(csvUrl)
                 .then(response => response.text())
                 .then(csvText => {
