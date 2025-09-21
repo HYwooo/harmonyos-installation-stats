@@ -1,10 +1,11 @@
-# .github/workflows/scrape.yml
-
-name: Daily HarmonyOS Installation Scraper
+name: HarmonyOS Installation Scraper
 
 on:
   schedule:
-    - cron: '10 2 * * *'
+    - cron: '6 0 * * *'  
+    - cron: '12 4 * * *'  
+    - cron: '18 8 * * *'  
+    - cron: '24 12 * * *'
   workflow_dispatch:
 
 jobs:
@@ -66,4 +67,3 @@ jobs:
           
       - name: Purge jsDelivr cache
         run: curl --fail 'https://purge.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv'
-          
