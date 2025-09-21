@@ -1077,7 +1077,7 @@
                         const padding = Math.max(range * 0.1, 1000000);
                         maxY = maxY + padding;
                         // 可选：给底部也留一点空间
-                        minY = Math.max(0, minY - padding * 0.1);
+                        minY = Math.max(0, minY - padding * 0.3);
                     } else {
                          // 如果一个月内没有数据点，则使用全部数据的范围
                          minY = Math.min(...installations);
@@ -1135,7 +1135,7 @@
                 return `${year}${month}${day}`;
             }
             // Load CSV data with cache-busting query parameter
-            const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv?v=${getCurrentDateYYYYMMDD()}`;
+            const csvUrl = `https://gcore.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv?v=${getCurrentDateYYYYMMDD()}`;
             //const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv`;
             fetch(csvUrl)
                 .then(response => response.text())
