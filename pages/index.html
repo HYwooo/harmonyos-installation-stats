@@ -8,7 +8,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-RX71B7RJM5');
 </script>
     <!-- End Google Tag Manager -->
@@ -18,7 +17,7 @@
     <meta name="description" content="HarmonyOS installation statistics, growth charts, and forecasts. HarmonyOS安装统计、增长图表和预测。">
     <meta name="keywords" content="HarmonyOS, installation, statistics, stats, growth, forecast, 鸿蒙系统, 安装量, 统计, 增长, 预测">
     <meta name="author" content="HYwooo">
-    <link rel="canonical" href="https://yourdomain.com/">
+    <link rel="canonical" href="https://harmonyos-installation-stats.pages.dev/">
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="public, max-age=300">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -254,7 +253,6 @@
         footer a:hover {
             text-decoration: underline;
         }
-
         /* Language Selector */
         #language-selector {
             position: absolute;
@@ -262,7 +260,6 @@
             right: 20px;
             z-index: 100;
         }
-
         #language-toggle {
             background: var(--language-selector-bg);
             border: 1px solid var(--language-selector-border);
@@ -278,11 +275,9 @@
             align-items: center;
             gap: 5px;
         }
-
         #language-toggle:hover {
             background: var(--language-selector-hover-bg);
         }
-
         #language-options {
             position: absolute;
             top: 100%;
@@ -301,13 +296,11 @@
             pointer-events: none;
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
-
         #language-options.show {
             opacity: 1;
             transform: translateY(0) scale(1);
             pointer-events: auto;
         }
-
         #language-options li {
             padding: 10px 15px;
             cursor: pointer;
@@ -317,11 +310,9 @@
             align-items: center;
             gap: 8px;
         }
-
         #language-options li:hover {
             background: var(--language-selector-hover-bg);
         }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -372,7 +363,6 @@
     </style>
 </head>
 <body>
-
     <!-- Loading Overlay -->
     <div id="loading-overlay">
         <svg class="loading-spinner" viewBox="0 0 50 50">
@@ -487,10 +477,8 @@
                     days_remaining: "剩余天数: "
                 }
             };
-
             let currentLang = 'en'; // Default fallback
             let globalData = null; // Store data globally to access after language change
-
             // Detect browser language
             const userLang = navigator.language || navigator.userLanguage;
             if (userLang.startsWith('zh')) {
@@ -498,18 +486,15 @@
             } else {
                 currentLang = 'en';
             }
-
             // Language switcher logic
             const toggleButton = document.getElementById('language-toggle');
             const languageText = document.getElementById('language-text');
             const optionsList = document.getElementById('language-options');
-
             toggleButton.addEventListener('click', function() {
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
                 this.setAttribute('aria-expanded', !isExpanded);
                 optionsList.classList.toggle('show');
             });
-
             document.querySelectorAll('#language-options li').forEach(item => {
                 item.addEventListener('click', function() {
                     const selectedLang = this.getAttribute('data-lang');
@@ -532,7 +517,6 @@
                     toggleButton.setAttribute('aria-expanded', 'false');
                 });
             });
-
             // Close language selector if clicked outside
             document.addEventListener('click', function(event) {
                 if (!toggleButton.contains(event.target) && !optionsList.contains(event.target)) {
@@ -540,7 +524,6 @@
                     toggleButton.setAttribute('aria-expanded', 'false');
                 }
             });
-
             function translatePage() {
                 document.querySelectorAll('[data-i18n]').forEach(element => {
                     const key = element.getAttribute('data-i18n');
@@ -556,16 +539,13 @@
                 // Update the HTML lang attribute
                 document.documentElement.lang = currentLang;
             }
-
             // Set initial button text
             languageText.textContent = currentLang === 'en' ? 'EN' : '中文';
             // Apply initial translation
             translatePage();
-
             // --- Chart and Data Logic ---
             let chartData = null;
             let forecastData = null;
-
             function parseCSV(csvText) {
                 const lines = csvText.trim().split('\n');
                 const headers = lines[0].split(',');
@@ -580,11 +560,9 @@
                 }
                 return data;
             }
-
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
-
             function getNextMilestones(current) {
                 const currentB = current / 1000000000;
                 const scale = Math.pow(10, Math.floor(Math.log10(currentB)));
@@ -609,7 +587,6 @@
                 }
                 return [milestone1, milestone2, milestone5];
             }
-
             // --- Modified Forecast Calculation Logic ---
             function calculateForecast(data) {
                 if (data.length === 0) return null;
@@ -621,7 +598,6 @@
                 const startDateIndex = Math.max(0, data.length - 14);
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) return null;
-
                 const growthRates = [];
                 const dailyIncreases = [];
                 for (let i = 1; i < periodData.length; i++) {
@@ -631,11 +607,9 @@
                     if (!isNaN(dailyInc)) dailyIncreases.push(dailyInc);
                 }
                 if (growthRates.length === 0 || dailyIncreases.length === 0) return null;
-
                 // Calculate average growth metrics
                 const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
                 const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
-
                 // Sort growth rates for optimistic/pessimistic calculations
                 growthRates.sort((a, b) => a - b);
                 const optimisticIndex = Math.ceil(growthRates.length * 0.5);
@@ -645,26 +619,21 @@
                 const pessimisticRates = growthRates.slice(0, optimisticIndex);
                 const pessimisticGrowthRate = pessimisticRates.length > 0 ?
                     pessimisticRates.reduce((a, b) => a + b, 0) / pessimisticRates.length : avgGrowthRate;
-
                 // First, calculate days using constant growth rate model
                 const daysToTargetGrowthRate = Math.ceil(Math.log(targetMilestone / currentInstallations) / Math.log(1 + avgGrowthRate/100));
-
                 // Determine which model to use based on days remaining
                 const USE_LINEAR_MODEL_THRESHOLD = 30;
                 const useLinearModel = daysToTargetGrowthRate > USE_LINEAR_MODEL_THRESHOLD;
-
                 if (useLinearModel) {
                     // Use constant daily increase model
                     // Convert growth rates to daily increases for optimistic/pessimistic
                     const currentDailyIncrease = avgDailyIncrease;
                     const optimisticDailyIncrease = (optimisticGrowthRate / 100) * currentInstallations;
                     const pessimisticDailyIncrease = (pessimisticGrowthRate / 100) * currentInstallations;
-                    
                     // Calculate days using linear model
                     const daysToTargetMostLikely = Math.ceil((targetMilestone - currentInstallations) / currentDailyIncrease);
                     const daysToTargetOptimistic = Math.ceil((targetMilestone - currentInstallations) / optimisticDailyIncrease);
                     const daysToTargetPessimistic = Math.ceil((targetMilestone - currentInstallations) / pessimisticDailyIncrease);
-                    
                     // Calculate dates
                     const dateMostLikely = new Date(currentDate);
                     dateMostLikely.setDate(dateMostLikely.getDate() + Math.max(0, daysToTargetMostLikely));
@@ -672,7 +641,6 @@
                     dateOptimistic.setDate(dateOptimistic.getDate() + Math.max(0, daysToTargetOptimistic));
                     const datePessimistic = new Date(currentDate);
                     datePessimistic.setDate(datePessimistic.getDate() + Math.max(0, daysToTargetPessimistic));
-
                     return {
                         currentInstallations,
                         currentDate,
@@ -693,14 +661,12 @@
                     const daysToTargetMostLikely = daysToTargetGrowthRate;
                     const daysToTargetOptimistic = Math.ceil(Math.log(targetMilestone / currentInstallations) / Math.log(1 + optimisticGrowthRate/100));
                     const daysToTargetPessimistic = Math.ceil(Math.log(targetMilestone / currentInstallations) / Math.log(1 + pessimisticGrowthRate/100));
-
                     const dateMostLikely = new Date(currentDate);
                     dateMostLikely.setDate(dateMostLikely.getDate() + Math.max(0, daysToTargetMostLikely));
                     const dateOptimistic = new Date(currentDate);
                     dateOptimistic.setDate(dateOptimistic.getDate() + Math.max(0, daysToTargetOptimistic));
                     const datePessimistic = new Date(currentDate);
                     datePessimistic.setDate(datePessimistic.getDate() + Math.max(0, daysToTargetPessimistic));
-
                     return {
                         currentInstallations,
                         currentDate,
@@ -718,20 +684,16 @@
                     };
                 }
             }
-
             function createForecastChart(data, forecastData) {
                 if (!forecastData) {
                     document.getElementById('forecast-chart').innerHTML =
                         `<div style="height: 300px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0.7;" data-i18n="chart_load_failed">${translations[currentLang]['chart_load_failed'] || 'Failed to calculate forecast'}</div>`;
                     return;
                 }
-
                 const dates = data.map(row => row.Date);
                 const installations = data.map(row => parseInt(row.Installations.replace(/,/g, '')));
-
                 // Get chart label color for axis fonts
                 const chartLabelColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim();
-
                 const historicalTrace = {
                     x: dates,
                     y: installations,
@@ -741,13 +703,11 @@
                     name: translations[currentLang]['historical_data'] || 'Historical Data',
                     showlegend: false
                 };
-
                 // Determine which model was used for forecast
                 if (forecastData.useLinearModel) {
                     // Linear model forecast line
                     const forecastDates = [forecastData.currentDate.toISOString().split('T')[0], forecastData.dateMostLikely.toISOString().split('T')[0]];
                     const forecastInstallations = [forecastData.currentInstallations, forecastData.targetMilestone];
-                    
                     const linearForecastTrace = {
                         x: forecastDates,
                         y: forecastInstallations,
@@ -757,7 +717,6 @@
                         name: translations[currentLang]['linear_forecast'] || 'Linear Forecast',
                         showlegend: false
                     };
-
                     const annotations = [
                         {
                             x: forecastData.dateMostLikely.toISOString().split('T')[0],
@@ -775,7 +734,6 @@
                             font: { color: '#0a84ff', size: 12 }
                         }
                     ];
-
                     const layout = {
                         margin: { t: 0, b: 40, l: 50, r: 50 },
                         xaxis: {
@@ -796,7 +754,6 @@
                         showlegend: false,
                         annotations: annotations
                     };
-
                     Plotly.newPlot('forecast-chart', [historicalTrace, linearForecastTrace], layout, {responsive: true});
                 } else {
                     // Exponential model forecast lines (original logic)
@@ -811,7 +768,6 @@
                         name: translations[currentLang]['optimistic_forecast'] || 'Optimistic Forecast',
                         showlegend: false
                     };
-
                     const forecastDates2 = [forecastData.currentDate.toISOString().split('T')[0], forecastData.dateMostLikely.toISOString().split('T')[0]];
                     const mostLikelyTrace = {
                         x: forecastDates2,
@@ -822,7 +778,6 @@
                         name: translations[currentLang]['likely_forecast'] || 'Most Likely Forecast',
                         showlegend: false
                     };
-
                     const forecastDates3 = [forecastData.currentDate.toISOString().split('T')[0], forecastData.datePessimistic.toISOString().split('T')[0]];
                     const pessimisticTrace = {
                         x: forecastDates3,
@@ -833,7 +788,6 @@
                         name: translations[currentLang]['pessimistic_forecast'] || 'Pessimistic Forecast',
                         showlegend: false
                     };
-
                     const annotations = window.innerWidth > 768 ? [
                         {
                             x: forecastData.dateOptimistic.toISOString().split('T')[0],
@@ -878,7 +832,6 @@
                             font: { color: '#ff9f0a' }
                         }
                     ] : [];
-
                     const middlePointAnnotation = {
                         x: forecastData.dateMostLikely.toISOString().split('T')[0],
                         y: forecastData.targetMilestone,
@@ -895,7 +848,6 @@
                         font: { color: '#0a84ff', size: 12 }
                     };
                     annotations.push(middlePointAnnotation);
-
                     const layout = {
                         margin: { t: 0, b: 40, l: 50, r: 50 },
                         xaxis: {
@@ -916,11 +868,9 @@
                         showlegend: false,
                         annotations: annotations
                     };
-
                     Plotly.newPlot('forecast-chart', [historicalTrace, optimisticTrace, mostLikelyTrace, pessimisticTrace], layout, {responsive: true});
                 }
             }
-
             function calculateMilestones(data) {
                 if (data.length === 0) return;
                 const latest = data[data.length - 1];
@@ -929,7 +879,6 @@
                 document.getElementById('milestone-1b').textContent = formatNumber(milestone1);
                 document.getElementById('milestone-2b').textContent = formatNumber(milestone2);
                 document.getElementById('milestone-5b').textContent = formatNumber(milestone5);
-
                 const startDateIndex = Math.max(0, data.length - 14);
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) {
@@ -941,7 +890,6 @@
                     document.getElementById('days-5b').textContent = `${translations[currentLang]['days_remaining'] || 'Days Remaining: '}--`;
                     return;
                 }
-
                 const growthRates = [];
                 const dailyIncreases = [];
                 for (let i = 1; i < periodData.length; i++) {
@@ -959,11 +907,9 @@
                     document.getElementById('days-5b').textContent = `${translations[currentLang]['days_remaining'] || 'Days Remaining: '}--`;
                     return;
                 }
-
                 // Calculate average growth metrics
                 const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
                 const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
-
                 // Sort growth rates for optimistic/pessimistic calculations
                 growthRates.sort((a, b) => a - b);
                 const optimisticIndex = Math.ceil(growthRates.length * 0.5);
@@ -973,21 +919,17 @@
                 const pessimisticRates = growthRates.slice(0, optimisticIndex);
                 const pessimisticGrowthRate = pessimisticRates.length > 0 ?
                     pessimisticRates.reduce((a, b) => a + b, 0) / pessimisticRates.length : avgGrowthRate;
-
                 // First, calculate days using constant growth rate model for milestone 2
                 const daysTo2GrowthRate = Math.ceil(Math.log(milestone2 / currentInstallations) / Math.log(1 + avgGrowthRate/100));
-
                 // Determine which model to use based on days remaining for milestone 2
                 const USE_LINEAR_MODEL_THRESHOLD = 30;
                 const useLinearModel = daysTo2GrowthRate > USE_LINEAR_MODEL_THRESHOLD;
-
                 let daysTo1, daysTo2, daysTo5;
                 if (useLinearModel) {
                     // Use constant daily increase model
                     const currentDailyIncrease = avgDailyIncrease;
                     const optimisticDailyIncrease = (optimisticGrowthRate / 100) * currentInstallations;
                     const pessimisticDailyIncrease = (pessimisticGrowthRate / 100) * currentInstallations;
-                    
                     // Calculate days using linear model for all milestones
                     daysTo1 = Math.ceil((milestone1 - currentInstallations) / currentDailyIncrease);
                     daysTo2 = Math.ceil((milestone2 - currentInstallations) / currentDailyIncrease);
@@ -999,7 +941,6 @@
                     daysTo2 = Math.ceil(Math.log(milestone2 / currentInstallations) / Math.log(1 + growthRate));
                     daysTo5 = Math.ceil(Math.log(milestone5 / currentInstallations) / Math.log(1 + growthRate));
                 }
-
                 const currentDate = new Date(latest.Date);
                 const date1 = new Date(currentDate);
                 date1.setDate(date1.getDate() + Math.max(0, daysTo1));
@@ -1007,9 +948,7 @@
                 date2.setDate(date2.getDate() + Math.max(0, daysTo2));
                 const date5 = new Date(currentDate);
                 date5.setDate(date5.getDate() + Math.max(0, daysTo5));
-
                 const formatDate = (date) => date.toISOString().split('T')[0];
-
                 document.getElementById('date-1b').textContent = `${translations[currentLang]['target_date'] || 'Target Date: '}${daysTo1 >= 0 ? formatDate(date1) : '--'}`;
                 document.getElementById('date-2b').textContent = `${translations[currentLang]['target_date'] || 'Target Date: '}${daysTo2 >= 0 ? formatDate(date2) : '--'}`;
                 document.getElementById('date-5b').textContent = `${translations[currentLang]['target_date'] || 'Target Date: '}${daysTo5 >= 0 ? formatDate(date5) : '--'}`;
@@ -1017,14 +956,12 @@
                 document.getElementById('days-2b').textContent = `${translations[currentLang]['days_remaining'] || 'Days Remaining: '}${daysTo2 >= 0 ? daysTo2 : '--'}`;
                 document.getElementById('days-5b').textContent = `${translations[currentLang]['days_remaining'] || 'Days Remaining: '}${daysTo5 >= 0 ? daysTo5 : '--'}`;
             }
-
             function calculateStats(data) {
                 if (data.length === 0) return null;
                 const latest = data[data.length - 1];
                 // Update last updated date with translation
                 document.getElementById('last-updated').textContent = `${translations[currentLang]['last_updated'] || 'Latest Updated: '}${latest.Date}`;
                 document.getElementById('total-installations').textContent = formatNumber(parseInt(latest.Installations));
-
                 const startDateIndex = Math.max(0, data.length - 14);
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) {
@@ -1033,19 +970,16 @@
                     document.getElementById('avg-growth-rate').textContent = '--';
                     return;
                 }
-
                 const startValue = parseInt(periodData[0].Installations);
                 const endValue = parseInt(periodData[periodData.length - 1].Installations);
                 const totalIncrease = endValue - startValue;
                 document.getElementById('total-increase').textContent = formatNumber(totalIncrease);
-
                 const dailyIncreases = [];
                 for (let i = 1; i < periodData.length; i++) {
                     dailyIncreases.push(parseInt(periodData[i].Daily_Increase));
                 }
                 const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
                 document.getElementById('avg-daily-increase').textContent = formatNumber(Math.round(avgDailyIncrease));
-
                 const growthRates = [];
                 for (let i = 1; i < periodData.length; i++) {
                     const rate = parseFloat(periodData[i].Growth_Rate);
@@ -1053,20 +987,16 @@
                 }
                 const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
                 document.getElementById('avg-growth-rate').textContent = avgGrowthRate.toFixed(1) + '%';
-
                 calculateMilestones(data);
                 forecastData = calculateForecast(data);
                 createForecastChart(data, forecastData);
             }
-
             function createGrowthChart(data) {
                 chartData = data;
                 const dates = data.map(row => row.Date);
                 const installations = data.map(row => parseInt(row.Installations.replace(/,/g, '')));
-
                 // Get chart label color for axis fonts
                 const chartLabelColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim();
-
                 const trace = {
                     x: dates,
                     y: installations,
@@ -1076,7 +1006,6 @@
                     name: translations[currentLang]['installations_label'] || 'Installations',
                     showlegend: false
                 };
-
                 const latest = data[data.length - 1];
                 const lastPointAnnotation = {
                     x: latest.Date,
@@ -1093,7 +1022,6 @@
                     borderwidth: 2,
                     font: { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim(), size: 12 }
                 };
-
                 const layout = {
                     margin: { t: 0, b: 40, l: 50, r: 50 },
                     xaxis: {
@@ -1114,14 +1042,64 @@
                     showlegend: false,
                     annotations: [lastPointAnnotation]
                 };
-
                 Plotly.newPlot('growth-chart', [trace], layout, {responsive: true});
-            }
 
+                // --- 添加 relayout 以自动聚焦最近一个月的数据，并调整 Y 轴 ---
+                // 确保数据存在且至少有一个点
+                if (dates.length > 0) {
+                    // 获取最后一个日期作为当前日期
+                    const currentDate = new Date(dates[dates.length - 1]);
+                    // 计算一个月前的日期 (修复：使用 setDate 并减去天数)
+                    const oneMonthAgo = new Date(currentDate);
+                    oneMonthAgo.setDate(currentDate.getDate() - 30);
+
+                    const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
+                    const currentDateStr = currentDate.toISOString().split('T')[0];
+
+                    // 过滤出最近一个月的数据，用于计算 Y 轴范围
+                    const filteredDataIndices = [];
+                    for (let i = 0; i < dates.length; i++) {
+                        if (dates[i] >= oneMonthAgoStr && dates[i] <= currentDateStr) {
+                           filteredDataIndices.push(i);
+                        }
+                    }
+
+                    let minY = Infinity;
+                    let maxY = -Infinity;
+                    if (filteredDataIndices.length > 0) {
+                        for (const i of filteredDataIndices) {
+                            const val = installations[i];
+                            if (val < minY) minY = val;
+                            if (val > maxY) maxY = val;
+                        }
+                        // 为顶部的 label 留出空间 (例如，增加 10% 或至少 1,000,000 的空间)
+                        const range = maxY - minY;
+                        const padding = Math.max(range * 0.1, 1000000);
+                        maxY = maxY + padding;
+                        // 可选：给底部也留一点空间
+                        minY = Math.max(0, minY - padding * 0.1);
+                    } else {
+                         // 如果一个月内没有数据点，则使用全部数据的范围
+                         minY = Math.min(...installations);
+                         maxY = Math.max(...installations);
+                         const range = maxY - minY;
+                         const padding = Math.max(range * 0.1, 1000000);
+                         maxY = maxY + padding;
+                         minY = Math.max(0, minY - padding * 0.1);
+                    }
+
+
+                    // 自动触发 relayout，同时设置 x 和 y 轴范围
+                    Plotly.relayout('growth-chart', {
+                        'xaxis.range': [oneMonthAgoStr, currentDateStr],
+                        'yaxis.range': [minY, maxY]
+                    });
+                }
+                // --- 结束添加 ---
+            }
             function resizeChart() {
                 if (chartData) {
                     const chartLabelColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-label-color').trim();
-                    
                     // Update growth chart axis colors
                     Plotly.relayout('growth-chart', {
                         'xaxis.color': chartLabelColor,
@@ -1131,7 +1109,6 @@
                         'yaxis.titlefont.color': chartLabelColor,
                         'yaxis.tickfont.color': chartLabelColor
                     });
-                    
                     if (forecastData) {
                         // Update forecast chart axis colors
                         Plotly.relayout('forecast-chart', {
@@ -1142,7 +1119,6 @@
                             'yaxis.titlefont.color': chartLabelColor,
                             'yaxis.tickfont.color': chartLabelColor
                         });
-                        
                         // Redraw forecast chart on resize to handle responsive annotations
                         createForecastChart(chartData, forecastData);
                     }
@@ -1150,7 +1126,6 @@
                     Plotly.Plots.resize('forecast-chart');
                 }
             }
-
             // Function to get current date in YYYYMMDD format
             function getCurrentDateYYYYMMDD() {
                 const now = new Date();
@@ -1159,10 +1134,8 @@
                 const day = String(now.getDate()).padStart(2, '0');
                 return `${year}${month}${day}`;
             }
-
             // Load CSV data with cache-busting query parameter
             const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv?v=${getCurrentDateYYYYMMDD()}`;
-            
             //const csvUrl = `https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv`;
             fetch(csvUrl)
                 .then(response => response.text())
@@ -1176,7 +1149,6 @@
                     console.error('Error loading CSV ', error);
                     document.getElementById('growth-chart').innerHTML = `<div style="height: 300px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0.7;" data-i18n="chart_load_failed">${translations[currentLang]['chart_load_failed'] || 'Failed to load chart data'}</div>`;
                 });
-
             // Hide loading overlay
             function hideLoadingOverlay() {
                 const overlay = document.getElementById('loading-overlay');
@@ -1191,11 +1163,9 @@
                     }
                 });
             }
-
             setTimeout(function() {
                 hideLoadingOverlay();
             }, 2000);
-
             // Animate loading spinner
             const spinner = document.querySelector('.spinner-circle');
             anime({
@@ -1205,7 +1175,6 @@
                 easing: 'linear',
                 loop: true
             });
-
             // Animate loading text
             const loadingText = document.querySelector('.loading-text');
             anime({
@@ -1215,7 +1184,6 @@
                 easing: 'easeInOutSine',
                 loop: true
             });
-
             // Handle window resize
             window.addEventListener('resize', resizeChart);
         });
