@@ -697,7 +697,7 @@
                 const historicalTrace = {
                     x: dates,
                     y: installations,
-                    mode: 'lines+markers',
+                    mode: 'lines',
                     line: { shape: 'spline', color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() },
                     marker: { color: getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() },
                     name: translations[currentLang]['historical_data'] || 'Historical Data',
@@ -712,7 +712,7 @@
                         x: forecastDates,
                         y: forecastInstallations,
                         mode: 'lines+markers',
-                        line: { dash: 'dot', color: '#0a84ff' },
+                        line: { dash: 'dot', color: '#92a8d1' },
                         marker: { color: '#0a84ff' },
                         name: translations[currentLang]['linear_forecast'] || 'Linear Forecast',
                         showlegend: false
