@@ -1053,13 +1053,18 @@
                     const oneMonthAgo = new Date(currentDate);
                     oneMonthAgo.setDate(currentDate.getDate() - 30);
 
-                    const oneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
+                    //计算两周前的日期
+                    const twoWeeksAgo = new Date(currentDate);
+                    twoWeeksAgo.setDate(currentDate.getDate() - 14);
+                    
+                    const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
+                    const pneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
                     const currentDateStr = currentDate.toISOString().split('T')[0];
 
                     // 过滤出最近一个月的数据，用于计算 Y 轴范围
                     const filteredDataIndices = [];
                     for (let i = 0; i < dates.length; i++) {
-                        if (dates[i] >= oneMonthAgoStr && dates[i] <= currentDateStr) {
+                        if (dates[i] >= twoWeeksAgoStr && dates[i] <= currentDateStr) {
                            filteredDataIndices.push(i);
                         }
                     }
@@ -1077,7 +1082,7 @@
                         const padding = Math.max(range * 0.1, 1000000);
                         maxY = maxY + padding;
                         // 可选：给底部也留一点空间
-                        minY = Math.max(0, minY - padding * 0.3);
+                        minY = Math.max(0, minY - padding * 0.1);
                     } else {
                          // 如果一个月内没有数据点，则使用全部数据的范围
                          minY = Math.min(...installations);
@@ -1091,7 +1096,7 @@
 
                     // 自动触发 relayout，同时设置 x 和 y 轴范围
                     Plotly.relayout('growth-chart', {
-                        'xaxis.range': [oneMonthAgoStr, currentDateStr],
+                        'xaxis.range': [twoWeeksAgoStr, currentDateStr],
                         'yaxis.range': [minY, maxY]
                     });
                 }
