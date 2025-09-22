@@ -2,10 +2,7 @@ name: HarmonyOS Installation Scraper
 
 on:
   schedule:
-    - cron: '6 0 * * *'  
-    - cron: '12 4 * * *'  
-    - cron: '18 8 * * *'  
-    - cron: '24 12 * * *'
+    - cron: '6 1 * * *'  
   workflow_dispatch:
 
 jobs:
@@ -41,7 +38,7 @@ jobs:
 
       # 第5步: 运行爬虫脚本
       - name: Run scraper
-        run: python scrape_harmony_stats.py
+        run: python scrape_harmonyos_stats.py
 
       # 第6步: (简化) 提交并推送变更
       - name: Commit and push if changed
@@ -51,12 +48,12 @@ jobs:
           
           # 注意：这里我们使用 `git add -f` (force) 或者更好的方式是检查文件是否存在
           # 一个更稳健的方式是先检查文件是否存在
-          if [ -f harmony_install_stats.csv ]; then
-            git add harmony_install_stats.csv
+          if [ -f ./pages/harmonyos_installation_stats.csv ]; then
+            git add ./pages/harmonyos_installation_stats.csv
             git diff --staged --quiet || git commit -m "ci: Update HarmonyOS installation stats."
             git push
           else
-            echo "harmony_install_stats.csv not found, skipping commit."
+            echo "./pages/harmonyos_installation_stats.csv not found, skipping commit."
           fi
           # 同时处理可能的截图
           if [ -f error_screenshot.png ]; then
@@ -66,4 +63,4 @@ jobs:
           fi
           
       - name: Purge jsDelivr cache
-        run: curl --fail 'https://purge.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/harmony_install_stats.csv'
+        run: curl --fail 'https://purge.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/pages/harmonyos_installation_stats.csv'
