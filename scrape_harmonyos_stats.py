@@ -14,7 +14,7 @@ import io
 # 目标网页URL
 TARGET_URL = "https://harmony5.cn/install"
 # CSV文件名
-CSV_FILE = "harmony_install_stats.csv"
+CSV_FILE = "./pages/harmonyos_installation_stats.csv"
 
 def fetch_harmony_data():
     """
@@ -24,9 +24,9 @@ def fetch_harmony_data():
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1424x4769")
+    options.add_argument("--window-size=1440x960")
     options.add_argument("--timezone=Asia/Shanghai")
-    options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.5735.196 Safari/537.36')
+    options.add_argument('user-agent=Mozilla/5.0 (Tablet; OpenHarmony 6.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 ArkWeb/6.0.0.47 HuaweiBrowser/5.1.8.311')
 
     driver = None
     try:
