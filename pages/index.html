@@ -399,15 +399,15 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-value" id="total-increase">--</div>
-                <div class="stat-label" data-i18n="total_increase_label">14-Day Total Installation Increase</div>
+                <div class="stat-label" data-i18n="total_increase_label">Past 10 Days Total Installation Increase</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="avg-daily-increase">--</div>
-                <div class="stat-label" data-i18n="avg_daily_increase_label">14-Day Average Daily Installation Increase</div>
+                <div class="stat-label" data-i18n="avg_daily_increase_label">Daily Installation Increase MA10</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value" id="avg-growth-rate">--</div>
-                <div class="stat-label" data-i18n="avg_growth_rate_label">14-Day Average Daily Installation Growth Rate</div>
+                <div class="stat-label" data-i18n="avg_growth_rate_label">Daily Installation Growth Rate MA10</div>
             </div>
         </div>
         <div class="chart-container">
@@ -449,9 +449,9 @@
                     last_updated: "Latest Updated: ",
                     total_installations_label: "Total Installations",
                     growth_chart_label: "HarmonyOS Installation Growth Chart",
-                    total_increase_label: "14-Day Total Installation Increase",
-                    avg_daily_increase_label: "14-Day Average Daily Installation Increase",
-                    avg_growth_rate_label: "14-Day Average Daily Installation Growth Rate",
+                    total_increase_label: "Past 10 Days Total Installation Increase",
+                    avg_daily_increase_label: "Daily Installation Increase MA10",
+                    avg_growth_rate_label: "Daily Installation Growth Rate MA10",
                     forecast_chart_label: "Forecast Timeline to Reach Milestone",
                     milestone_1_title: "Milestone 1",
                     milestone_2_title: "Milestone 2",
@@ -466,9 +466,9 @@
                     last_updated: "最近更新于: ",
                     total_installations_label: "总安装量",
                     growth_chart_label: "HarmonyOS 安装量增长图表",
-                    total_increase_label: "14天总安装量增长",
-                    avg_daily_increase_label: "14天平均每日安装量增长",
-                    avg_growth_rate_label: "14天平均每日安装量增长率",
+                    total_increase_label: "过去10日总安装量增长",
+                    avg_daily_increase_label: "每日安装量增长MA10",
+                    avg_growth_rate_label: "每日安装量增长率MA10",
                     forecast_chart_label: "达到里程碑的预测时间线",
                     milestone_1_title: "里程碑 1",
                     milestone_2_title: "里程碑 2",
@@ -595,7 +595,7 @@
                 const currentDate = new Date(latest.Date);
                 const [milestone1, milestone2, milestone5] = getNextMilestones(currentInstallations);
                 const targetMilestone = milestone2;
-                const startDateIndex = Math.max(0, data.length - 14);
+                const startDateIndex = Math.max(0, data.length - 10); // Changed from 14 to 10
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) return null;
                 const growthRates = [];
@@ -607,7 +607,7 @@
                     if (!isNaN(dailyInc)) dailyIncreases.push(dailyInc);
                 }
                 if (growthRates.length === 0 || dailyIncreases.length === 0) return null;
-                // Calculate average growth metrics
+                // Calculate average growth metrics (MA10)
                 const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
                 const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
                 // Sort growth rates for optimistic/pessimistic calculations
@@ -879,7 +879,7 @@
                 document.getElementById('milestone-1b').textContent = formatNumber(milestone1);
                 document.getElementById('milestone-2b').textContent = formatNumber(milestone2);
                 document.getElementById('milestone-5b').textContent = formatNumber(milestone5);
-                const startDateIndex = Math.max(0, data.length - 14);
+                const startDateIndex = Math.max(0, data.length - 10); // Changed from 14 to 10
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) {
                     document.getElementById('date-1b').textContent = `${translations[currentLang]['target_date'] || 'Target Date: '}--`;
@@ -907,7 +907,7 @@
                     document.getElementById('days-5b').textContent = `${translations[currentLang]['days_remaining'] || 'Days Remaining: '}--`;
                     return;
                 }
-                // Calculate average growth metrics
+                // Calculate average growth metrics (MA10)
                 const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
                 const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
                 // Sort growth rates for optimistic/pessimistic calculations
@@ -962,7 +962,7 @@
                 // Update last updated date with translation
                 document.getElementById('last-updated').textContent = `${translations[currentLang]['last_updated'] || 'Latest Updated: '}${latest.Date}`;
                 document.getElementById('total-installations').textContent = formatNumber(parseInt(latest.Installations));
-                const startDateIndex = Math.max(0, data.length - 14);
+                const startDateIndex = Math.max(0, data.length - 10); // Changed from 14 to 10
                 const periodData = data.slice(startDateIndex);
                 if (periodData.length < 2) {
                     document.getElementById('total-increase').textContent = '--';
@@ -974,18 +974,15 @@
                 const endValue = parseInt(periodData[periodData.length - 1].Installations);
                 const totalIncrease = endValue - startValue;
                 document.getElementById('total-increase').textContent = formatNumber(totalIncrease);
-                const dailyIncreases = [];
-                for (let i = 1; i < periodData.length; i++) {
-                    dailyIncreases.push(parseInt(periodData[i].Daily_Increase));
-                }
-                const avgDailyIncrease = dailyIncreases.reduce((a, b) => a + b, 0) / dailyIncreases.length;
+                // Calculate avg daily increase as total increase / 10
+                const avgDailyIncrease = totalIncrease / 10; // MA10
                 document.getElementById('avg-daily-increase').textContent = formatNumber(Math.round(avgDailyIncrease));
                 const growthRates = [];
                 for (let i = 1; i < periodData.length; i++) {
                     const rate = parseFloat(periodData[i].Growth_Rate);
                     if (!isNaN(rate)) growthRates.push(rate);
                 }
-                const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length;
+                const avgGrowthRate = growthRates.reduce((a, b) => a + b, 0) / growthRates.length; // MA10
                 document.getElementById('avg-growth-rate').textContent = avgGrowthRate.toFixed(1) + '%';
                 calculateMilestones(data);
                 forecastData = calculateForecast(data);
@@ -1043,7 +1040,6 @@
                     annotations: [lastPointAnnotation]
                 };
                 Plotly.newPlot('growth-chart', [trace], layout, {responsive: true});
-
                 // --- 添加 relayout 以自动聚焦最近一个月的数据，并调整 Y 轴 ---
                 // 确保数据存在且至少有一个点
                 if (dates.length > 0) {
@@ -1052,15 +1048,12 @@
                     // 计算一个月前的日期 (修复：使用 setDate 并减去天数)
                     const oneMonthAgo = new Date(currentDate);
                     oneMonthAgo.setDate(currentDate.getDate() - 30);
-
                     //计算两周前的日期
                     const twoWeeksAgo = new Date(currentDate);
                     twoWeeksAgo.setDate(currentDate.getDate() - 14);
-                    
                     const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
                     const pneMonthAgoStr = oneMonthAgo.toISOString().split('T')[0];
                     const currentDateStr = currentDate.toISOString().split('T')[0];
-
                     // 过滤出最近一个月的数据，用于计算 Y 轴范围
                     const filteredDataIndices = [];
                     for (let i = 0; i < dates.length; i++) {
@@ -1068,7 +1061,6 @@
                            filteredDataIndices.push(i);
                         }
                     }
-
                     let minY = Infinity;
                     let maxY = -Infinity;
                     if (filteredDataIndices.length > 0) {
@@ -1092,8 +1084,6 @@
                          maxY = maxY + padding;
                          minY = Math.max(0, minY - padding * 0.1);
                     }
-
-
                     // 自动触发 relayout，同时设置 x 和 y 轴范围
                     Plotly.relayout('growth-chart', {
                         'xaxis.range': [twoWeeksAgoStr, currentDateStr],
