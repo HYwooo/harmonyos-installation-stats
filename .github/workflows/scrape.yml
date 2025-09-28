@@ -2,7 +2,7 @@ name: HarmonyOS Installation Scraper
 
 on:
   schedule:
-    - cron: '6 1 * * *'  
+    - cron: '40 0 * * *'  
   workflow_dispatch:
 
 jobs:
