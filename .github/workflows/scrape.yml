@@ -64,3 +64,6 @@ jobs:
           
       - name: Purge jsDelivr cache
         run: curl --fail 'https://purge.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/pages/harmonyos_installation_stats.csv'
+    
+      - name: try to fetch from jsDelivr(fastly)
+        run: curl --fail 'https://fastly.jsdelivr.net/gh/HYwooo/harmonyos-installation-stats@master/pages/harmonyos_installation_stats.csv'
