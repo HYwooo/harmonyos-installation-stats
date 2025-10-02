@@ -1,5 +1,3 @@
-# scrape_harmony_stats.py
-
 import os
 import pandas as pd
 from datetime import datetime, timedelta
@@ -64,15 +62,13 @@ def fetch_harmony_data():
 
 def process_and_update_csv(new_df):
     """
-    处理抓取到的新数据，校正不连续的日期，并更新到CSV文件中。
+    处理抓取到的新数据，与现有CSV文件对齐，并按顺序追加新纪录。
     """
     if new_df is None or new_df.empty:
         print("未获取到有效的新数据，不更新CSV。")
         return
 
     try:
-        current_year = datetime.now().year
-        
         # 1. 初始数据清洗和类型转换
         processed_df = (
             new_df.rename(columns={
@@ -82,80 +78,74 @@ def process_and_update_csv(new_df):
                 new_df.columns[3]: 'Growth_Rate'
             })
             .assign(
-                # 创建一个临时的datetime对象列用于排序和比较
-                Date_dt=lambda df: pd.to_datetime(f'{current_year}-' + df['Date_Raw'], errors='coerce'),
                 Installations=lambda df: (df['Installations_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int),
                 Daily_Increase=lambda df: (df['Daily_Increase_Raw'].str.replace('万', '', regex=False).astype(float) * 10000).astype(int)
             )
-            .dropna(subset=['Date_dt']) # 丢弃任何无法解析的日期行
+            # 保留原始的Growth_Rate列
+            [['Installations', 'Daily_Increase', 'Growth_Rate']]
         )
-
-        # 2. 【核心逻辑】校正日期不连续的问题
-        print("\n--- 开始执行日期校正逻辑 ---")
-        # 按日期升序排序，确保按时间顺序处理
-        processed_df.sort_values(by='Date_dt', ascending=True, inplace=True)
-        processed_df.reset_index(drop=True, inplace=True)
-
-        # 定义日期修正的起始点
-        start_correction_date = pd.to_datetime(f'{current_year}-09-04')
         
-        # 找到起始日期在DataFrame中的索引
-        start_index = processed_df.index[processed_df['Date_dt'] >= start_correction_date].min()
+        # 去除安装量完全重复的行，保留第一个
+        processed_df.drop_duplicates(subset=['Installations'], keep='first', inplace=True)
 
-        if pd.notna(start_index) and start_index > 0:
-            # 将前一天的日期作为循环的起点
-            previous_date = processed_df.loc[start_index - 1, 'Date_dt']
-            
-            # 从起始索引开始遍历
-            for i in range(start_index, len(processed_df)):
-                current_date = processed_df.loc[i, 'Date_dt']
-                expected_date = previous_date + timedelta(days=1)
-                
-                # 如果当前日期与预期日期不符（出现跳跃）
-                if current_date > expected_date:
-                    print(f"检测到日期跳跃：从 {previous_date.strftime('%Y-%m-%d')} 跳到了 {current_date.strftime('%Y-%m-%d')}。")
-                    print(f" -> 将当前行的日期修正为: {expected_date.strftime('%Y-%m-%d')}")
-                    # 修正当前行的日期为预期的连续日期
-                    processed_df.loc[i, 'Date_dt'] = expected_date
-                
-                # 更新"前一天"为当前行处理后的日期
-                previous_date = processed_df.loc[i, 'Date_dt']
-        else:
-            print("未找到指定的日期校正起始点或数据不足，跳过日期校正。")
-        
-        print("--- 日期校正逻辑执行完毕 ---\n")
-
-        # 3. 格式化最终的DataFrame，准备合并
-        processed_df['Date'] = processed_df['Date_dt'].dt.strftime('%Y-%m-%d')
-        final_new_df = processed_df[['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
-
-        print("\n--- 本次从网页抓取并处理后的全部数据 ---")
-        print(final_new_df.to_string())
-        print("----------------------------------------\n")
-
-        # 4. 读取现有CSV，合并数据
+        # 2. 读取现有CSV数据作为基准
         if os.path.exists(CSV_FILE) and os.path.getsize(CSV_FILE) > 0:
             print(f"读取现有CSV文件: {CSV_FILE}")
             existing_df = pd.read_csv(CSV_FILE)
-            combined_df = pd.concat([existing_df, final_new_df], ignore_index=True)
-        else:
-            if os.path.exists(CSV_FILE):
-                print("CSV文件存在但为空，将直接使用新抓取的数据。")
-            else:
-                print("CSV文件不存在，将创建新文件。")
-            combined_df = final_new_df
+            
+            # 获取CSV中最新的日期和安装量
+            last_entry = existing_df.iloc[-1]
+            latest_date = pd.to_datetime(last_entry['Date'])
+            latest_installations = last_entry['Installations']
+            
+            print(f"CSV中最新记录: Date={latest_date.strftime('%Y-%m-%d')}, Installations={latest_installations}")
 
-        # 5. 去重、排序并保存
-        initial_rows = len(combined_df)
-        # 根据'Date'列去除重复项，并保留最后一次出现的数据（即本次抓取的新数据）
-        combined_df.drop_duplicates(subset=['Date'], keep='last', inplace=True)
-        rows_after_dedupe = len(combined_df)
-        
-        print(f"去重操作完成，移除了 {initial_rows - rows_after_dedupe} 个重复行。")
-        
-        combined_df.sort_values(by='Date', ascending=True, inplace=True)
+            # 3. 【核心逻辑】筛选、排序并重新生成日期
+            # 筛选出比CSV最新记录的安装量更大的新数据
+            new_data_to_append = processed_df[processed_df['Installations'] > latest_installations].copy()
+            
+            if new_data_to_append.empty:
+                print("没有发现新的安装量数据，CSV文件已是最新。")
+                return
+            
+            # 按安装量升序排列，确保数据是按时间增长的
+            new_data_to_append.sort_values(by='Installations', ascending=True, inplace=True)
+            
+            print(f"筛选出 {len(new_data_to_append)} 条新的安装量记录，将按顺序追加。")
+
+            # 生成新的连续日期
+            num_new_rows = len(new_data_to_append)
+            # 从最新日期的后一天开始生成
+            new_dates = pd.date_range(start=latest_date + timedelta(days=1), periods=num_new_rows)
+            
+            # 为新数据分配新生成的日期
+            new_data_to_append['Date'] = new_dates.strftime('%Y-%m-%d')
+            
+            # 整理列顺序
+            final_new_df = new_data_to_append[['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
+
+            # 4. 合并数据并保存
+            combined_df = pd.concat([existing_df, final_new_df], ignore_index=True)
+
+        else:
+            # 如果CSV文件不存在或为空，则需要特殊处理首次写入
+            print("CSV文件不存在或为空，将使用抓取的数据进行初始化。")
+            # 按安装量排序
+            processed_df.sort_values(by='Installations', ascending=True, inplace=True)
+            
+            # 假设第一条记录是某个已知起始日期，或者从今天倒推
+            # 为简化，我们这里从一个固定日期开始，或者你可以自己定义
+            start_date = datetime.now() - timedelta(days=len(processed_df))
+            new_dates = pd.date_range(start=start_date, periods=len(processed_df))
+            processed_df['Date'] = new_dates.strftime('%Y-%m-%d')
+            
+            combined_df = processed_df[['Date', 'Installations', 'Daily_Increase', 'Growth_Rate']]
+            
+        # 5. 保存到CSV
         combined_df.to_csv(CSV_FILE, index=False)
-        
+        print("--- 更新后的数据预览 (最后5条) ---")
+        print(combined_df.tail(5).to_string())
+        print("-----------------------------------")
         print(f"CSV文件更新成功！当前总条目数: {len(combined_df)}")
 
     except Exception as e:
